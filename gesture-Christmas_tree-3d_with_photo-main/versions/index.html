@@ -921,6 +921,20 @@
 // --> 
         init();
     </script>
+  <!-- 专属密码锁 -->
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        // 👇 这里改成你们的专属密码（数字或英文）
+        var secretPassword = "hanfanfan1225"; 
+        
+        var userInput = prompt("🔒 请说出唤醒这棵树的专属咒语：");
+
+        if (userInput !== secretPassword) {
+            document.body.innerHTML = "<div style='color:white; text-align:center; margin-top:20%; font-family:sans-serif; font-size:24px;'>🔒 咒语错误，这不是属于你的圣诞树。</div>";
+            document.body.style.backgroundColor = "black";
+        }
+    });
+</script>
 </body>
 
 </html>
