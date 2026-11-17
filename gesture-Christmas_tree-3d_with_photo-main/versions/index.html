@@ -935,6 +935,18 @@
         }
     });
 </script>
+  <!-- 背景音乐 -->
+<audio id="bgm" src="./queyue.mp3" loop></audio>
+
+<!-- 播放控制 -->
+<script>
+    document.addEventListener('click', function() {
+        var audio = document.getElementById('bgm');
+        if (audio && audio.paused) { 
+            audio.play(); 
+        }
+    }, { once: true });
+</script>
 </body>
 
 </html>
