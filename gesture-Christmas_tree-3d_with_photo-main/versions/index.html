@@ -169,15 +169,21 @@
     </style>
     
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap');
+        @font-face {
+            font-family: 'Cinzel';
+            font-style: normal;
+            font-weight: 400 700;
+            font-display: swap;
+            src: url('./lib/fonts/cinzel-latin.woff2') format('woff2');
+        }
     </style>
 
     <script type="importmap">
         {
             "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
-                "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/+esm"
+                "three": "./lib/three/three.module.js",
+                "three/addons/": "./lib/three/addons/",
+                "@mediapipe/tasks-vision": "./lib/mediapipe/vision_bundle.mjs"
             }
         }
     </script>
@@ -230,13 +236,24 @@
     </div>
     <div id="debug-info">Drag to rotate • Tap photo to view</div>
 
+    <script>
+        // 兜底：如果 15 秒后仍在加载（如浏览器过旧不支持 WebGL / ES Module），给出提示而不是一直转圈
+        setTimeout(function () {
+            var l = document.getElementById('loader');
+            if (l && l.style.opacity !== '0') {
+                var t = l.querySelector('.loader-text');
+                if (t) t.innerHTML = '加载失败，请使用最新版 Chrome / Edge / Safari 打开并刷新<br>Loading failed, please refresh with a modern browser';
+                var sp = l.querySelector('.spinner'); if (sp) sp.style.display = 'none';
+            }
+        }, 15000);
+    </script>
     <script type="module">
         import * as THREE from 'three';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
         import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
         import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'; 
-        import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
+        // 手势识别库体积较大，改为点击“Enable Gesture”时再按需加载，避免阻塞首屏
 
         // --- 核心配置 ---
         const CONFIG = {
@@ -766,9 +783,10 @@
             debugInfo.innerText = "Loading AI models...";
             video = document.getElementById('webcam');
             try {
-                const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
+                const { FilesetResolver, HandLandmarker } = await import('@mediapipe/tasks-vision');
+                const vision = await FilesetResolver.forVisionTasks(new URL('./lib/mediapipe/wasm', location.href).href);
                 handLandmarker = await HandLandmarker.createFromOptions(vision, {
-                    baseOptions: { modelAssetPath: `https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task`, delegate: "GPU" },
+                    baseOptions: { modelAssetPath: new URL('./lib/models/hand_landmarker.task', location.href).href, delegate: "GPU" },
                     runningMode: "VIDEO", numHands: 1
                 });
                 const constraints = { video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } } };

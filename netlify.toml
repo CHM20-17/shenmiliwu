@@ -1,0 +1,14 @@
+[build]
+  publish = "gesture-Christmas_tree-3d_with_photo-main/versions"
+
+# 大文件（库、模型、字体）长期缓存，二次打开更快
+[[headers]]
+  for = "/lib/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/lib/mediapipe/wasm/*.wasm"
+  [headers.values]
+    Content-Type = "application/wasm"
+    Cache-Control = "public, max-age=31536000, immutable"
