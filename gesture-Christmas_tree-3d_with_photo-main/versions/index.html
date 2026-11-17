@@ -921,31 +921,76 @@
 // --> 
         init();
     </script>
-  <!-- 专属密码锁 -->
+<!-- 专属密码锁 -->
 <script>
     window.addEventListener('DOMContentLoaded', function() {
-        // 👇 这里改成你们的专属密码（数字或英文）
-        var secretPassword = "hanfanfan1225"; 
-        
+        var secretPassword = "hanfanfan1225"; // 改成你们的密码
         var userInput = prompt("🔒 请说出唤醒这棵树的专属咒语：");
-
         if (userInput !== secretPassword) {
             document.body.innerHTML = "<div style='color:white; text-align:center; margin-top:20%; font-family:sans-serif; font-size:24px;'>🔒 咒语错误，这不是属于你的圣诞树。</div>";
             document.body.style.backgroundColor = "black";
         }
     });
 </script>
-  <!-- 背景音乐 -->
-<audio id="bgm" src="./queyue.mp3" loop></audio>
 
-<!-- 播放控制 -->
+<!-- 背景音乐 -->
+<audio id="bgm" src="./queyue.mp3" loop></audio>
+<button onclick="document.getElementById('bgm').play()" style="position:fixed; top:20px; right:20px; z-index:9999; padding:10px 20px; background:#ffd700; color:#000; border:none; border-radius:30px; font-weight:bold; cursor:pointer;">🎵 播放音乐</button>
+
+<!-- 上传照片到云端 -->
+<div style="position:fixed; bottom:20px; left:20px; z-index:9999; background:rgba(0,0,0,0.7); padding:15px; border-radius:10px; color:white;">
+    <p style="margin:0 0 10px 0; font-size:14px;">上传你们的专属回忆：</p >
+    <input type="file" id="photoInput" accept="image/*" style="margin-bottom:10px; color:white;">
+    <button id="uploadBtn" style="background:#ffd700; color:#000; border:none; padding:5px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">☁️ 保存到云端</button>
+</div>
+
 <script>
-    document.addEventListener('click', function() {
-        var audio = document.getElementById('bgm');
-        if (audio && audio.paused) { 
-            audio.play(); 
+    // 👇👇👇 这里换成你刚才复制的 ImgBB API Key 👇👇👇
+    const IMGBB_API_KEY = "d1693a8acf4ca15c94e89300cfa8cb5c";
+
+    // 点击上传按钮
+    document.getElementById('uploadBtn').addEventListener('click', function() {
+        const fileInput = document.getElementById('photoInput');
+        if (fileInput.files.length === 0) {
+            alert("请先选一张照片！");
+            return;
         }
-    }, { once: true });
+
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('image', file);
+
+        fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                let photoUrl = data.data.url;
+                // 将云端链接永久保存在浏览器缓存中
+                localStorage.setItem('mySpecialPhoto', photoUrl);
+                alert("上传成功！照片已永久保存！");
+                // 重新加载页面，让照片显示出来
+                window.location.reload();
+            } else {
+                alert("上传失败，可能是API Key不对或网络问题。");
+            }
+        })
+        .catch(error => alert("网络错误：" + error));
+    });
+
+    // 网页一打开，就去缓存里找照片并显示在左下角
+    window.addEventListener('load', function() {
+        let savedPhoto = localStorage.getItem('mySpecialPhoto');
+        if (savedPhoto) {
+            // 如果找到了，就在页面左下角显示出来
+            let img = document.createElement('img');
+            img.src = savedPhoto;
+            img.style.cssText = "position:fixed; bottom:20px; left:20px; width:150px; border-radius:10px; border:3px solid #ffd700; box-shadow:0 0 20px gold; z-index:9999;";
+            document.body.appendChild(img);
+        }
+    });
 </script>
 </body>
 
